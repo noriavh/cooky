@@ -1,0 +1,23 @@
+project_id = "zxaxfcvqirvplqrvubpl"
+
+[auth]
+site_url = "https://cooky-recipe.lovable.app"
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+
+[auth.sessions]
+timebox = 5184000
+inactivity_timeout = 5184000
+
+[functions.search-user]
+verify_jwt = false
+
+[functions.import-recipe]
+verify_jwt = false
+
+[functions.admin-auth]
+verify_jwt = false
+
+[functions.admin-data]
+verify_jwt = false
