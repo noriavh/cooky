@@ -94,10 +94,10 @@ serve(async (req) => {
       );
     }
 
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
-    if (!lovableApiKey) {
-      console.error('LOVABLE_API_KEY not configured');
+    if (!geminiApiKey) {
+      console.error('GEMINI_API_KEY not configured');
       return new Response(
         JSON.stringify({ success: false, error: 'AI non configurée' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -106,55 +106,33 @@ serve(async (req) => {
 
     console.log('Processing PDF:', fileName, 'for user:', userId);
 
-    // Use Gemini's native PDF vision capabilities
-    // Send the PDF as base64 to the AI model which supports PDF parsing
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: EXTRACTION_PROMPT },
-          { 
-            role: 'user', 
-            content: [
-              {
-                type: 'text',
-                text: `Voici un document PDF contenant une recette. Analyse le contenu et extrais toutes les informations de la recette.`
-              },
-              {
-                type: 'file',
-                file: {
-                  filename: fileName || 'recipe.pdf',
-                  file_data: `data:application/pdf;base64,${fileBase64}`
-                }
-              }
-            ]
-          }
-        ],
+        system_instruction: { parts: [{ text: EXTRACTION_PROMPT }] },
+        contents: [{
+          role: 'user',
+          parts: [
+            { text: `Voici un document PDF contenant une recette. Analyse le contenu et extrais toutes les informations de la recette.` },
+            { inline_data: { mime_type: 'application/pdf', data: fileBase64 } }
+          ]
+        }],
+        generationConfig: { responseMimeType: 'application/json' },
       }),
     });
 
     if (!aiResponse.ok) {
       const aiError = await aiResponse.text();
-      console.error('AI gateway error:', aiResponse.status, aiError);
-      
+      console.error('Gemini API error:', aiResponse.status, aiError);
+
       if (aiResponse.status === 429) {
         return new Response(
           JSON.stringify({ success: false, error: 'Limite de requêtes atteinte, réessayez plus tard' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (aiResponse.status === 402) {
-        return new Response(
-          JSON.stringify({ success: false, error: 'Crédits AI insuffisants' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
+
       return new Response(
         JSON.stringify({ success: false, error: 'Erreur lors de l\'analyse IA' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -162,7 +140,7 @@ serve(async (req) => {
     }
 
     const aiData = await aiResponse.json();
-    const aiContent = aiData.choices?.[0]?.message?.content;
+    const aiContent = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!aiContent) {
       console.error('No AI response content');

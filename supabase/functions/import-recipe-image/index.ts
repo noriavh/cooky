@@ -51,26 +51,14 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not configured');
     }
 
     console.log('Processing image for recipe extraction...');
 
-    // Use Gemini 2.5 Flash with vision capabilities to extract and structure the recipe
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: `Tu es un assistant spécialisé dans l'extraction de recettes de cuisine à partir d'images.
+    const imagePrompt = `Tu es un assistant spécialisé dans l'extraction de recettes de cuisine à partir d'images.
 Analyse l'image fournie (photo d'un livre de cuisine, page de magazine, etc.) et extrais toutes les informations de la recette.
 
 Tu DOIS retourner un objet JSON valide avec cette structure exacte:
@@ -95,50 +83,51 @@ Règles importantes:
 - Interprète intelligemment les quantités (ex: "1/2" devient 0.5)
 - Traduis en français si nécessaire
 - Si une information n'est pas visible, utilise null
-- Les étapes doivent être numérotées séquentiellement (position: 1, 2, 3...)
-- Retourne UNIQUEMENT le JSON, pas de texte avant ou après`
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Analyse cette image de recette et extrais toutes les informations au format JSON.'
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`
-                }
-              }
-            ]
-          }
-        ],
+- Les étapes doivent être numérotées séquentiellement (position: 1, 2, 3...)`;
+
+    // Extract mime type from base64 data URL, default to jpeg
+    let mimeType = 'image/jpeg';
+    let rawBase64 = imageBase64;
+    if (imageBase64.startsWith('data:')) {
+      const match = imageBase64.match(/^data:([^;]+);base64,(.+)$/);
+      if (match) {
+        mimeType = match[1];
+        rawBase64 = match[2];
+      }
+    }
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: imagePrompt }] },
+        contents: [{
+          role: 'user',
+          parts: [
+            { text: 'Analyse cette image de recette et extrais toutes les informations au format JSON.' },
+            { inline_data: { mime_type: mimeType, data: rawBase64 } }
+          ]
+        }],
+        generationConfig: { responseMimeType: 'application/json' },
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
-      
+      console.error('Gemini API error:', response.status, errorText);
+
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ success: false, error: 'Limite de requêtes atteinte. Veuillez réessayer dans quelques instants.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ success: false, error: 'Crédits insuffisants. Veuillez recharger votre compte.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      throw new Error(`AI Gateway error: ${response.status}`);
+
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!content) {
       throw new Error('Pas de réponse de l\'IA');

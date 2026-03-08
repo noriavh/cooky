@@ -5,32 +5,17 @@
 
 // Allowed origins for CORS - includes production, preview, and development URLs
 const ALLOWED_ORIGINS = [
-  'https://cooky-recipe.lovable.app',                              // Published URL
-  'https://id-preview--ccb3b1cf-84db-4835-8c28-a6cbfdfe959b.lovable.app', // Preview URL
-  'http://localhost:5173',                                         // Local development
+  'http://localhost:5173',                                         // Local development (Vite default)
+  'http://localhost:8080',                                         // Local development (Vite alt)
   'http://localhost:3000',                                         // Alternative local port
 ];
-
-// Also allow any Lovable preview/project subdomain pattern
-const LOVABLE_PREVIEW_PATTERN = /^https:\/\/[a-zA-Z0-9-]+\.(lovable\.app|lovableproject\.com)$/;
 
 /**
  * Checks if the origin is allowed
  */
 export function isAllowedOrigin(origin: string | null): boolean {
   if (!origin) return false;
-  
-  // Check exact match first
-  if (ALLOWED_ORIGINS.includes(origin)) {
-    return true;
-  }
-  
-  // Check Lovable preview pattern
-  if (LOVABLE_PREVIEW_PATTERN.test(origin)) {
-    return true;
-  }
-  
-  return false;
+  return ALLOWED_ORIGINS.includes(origin);
 }
 
 /**

@@ -93,10 +93,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
-    if (!lovableApiKey) {
-      console.error('LOVABLE_API_KEY not configured');
+    if (!geminiApiKey) {
+      console.error('GEMINI_API_KEY not configured');
       return new Response(
         JSON.stringify({ success: false, error: 'AI non configurée' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -126,7 +126,8 @@ Deno.serve(async (req) => {
       }
       formattedUrl = urlToScrape;
 
-      console.log('Scraping URL for user:', userId, 'URL:', urlToScrape);
+      console.log('[import-recipe] Scraping URL for user:', userId, 'URL:', urlToScrape);
+      console.log('[import-recipe] Firecrawl API key present:', !!firecrawlApiKey, 'length:', firecrawlApiKey.length);
 
       const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
         method: 'POST',
@@ -142,9 +143,10 @@ Deno.serve(async (req) => {
       });
 
       const scrapeData = await scrapeResponse.json();
+      console.log('[import-recipe] Firecrawl response status:', scrapeResponse.status);
 
       if (!scrapeResponse.ok || !scrapeData.success) {
-        console.error('Firecrawl error:', scrapeData);
+        console.error('[import-recipe] Firecrawl error:', JSON.stringify(scrapeData));
         return new Response(
           JSON.stringify({ 
             success: false, 
@@ -165,8 +167,8 @@ Deno.serve(async (req) => {
         );
       }
 
-      console.log('Content extracted, length:', pageContent.length);
-      console.log('Page title:', pageTitle);
+      console.log('[import-recipe] Content extracted, length:', pageContent.length);
+      console.log('[import-recipe] Page title:', pageTitle);
     } else {
       // Mode texte: use the provided text directly
       pageContent = text.trim();
@@ -174,27 +176,30 @@ Deno.serve(async (req) => {
     }
 
     // Step 2: Use AI to extract recipe information
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    console.log('[import-recipe] Calling Gemini API...');
+    console.log('[import-recipe] Gemini API key present:', !!geminiApiKey, 'length:', geminiApiKey.length);
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
-        messages: [
-          { role: 'system', content: EXTRACTION_PROMPT },
-          { 
-            role: 'user', 
-            content: `Voici le contenu de la page (titre: "${pageTitle || 'Non disponible'}"):\n\n${pageContent.substring(0, 15000)}` 
-          }
-        ],
+        system_instruction: { parts: [{ text: EXTRACTION_PROMPT }] },
+        contents: [{
+          role: 'user',
+          parts: [{ text: `Voici le contenu de la page (titre: "${pageTitle || 'Non disponible'}"):\n\n${pageContent.substring(0, 15000)}` }]
+        }],
+        generationConfig: {
+          responseMimeType: 'application/json',
+        },
       }),
     });
 
+    console.log('[import-recipe] Gemini response status:', aiResponse.status);
+
     if (!aiResponse.ok) {
       const aiError = await aiResponse.text();
-      console.error('AI gateway error:', aiResponse.status, aiError);
+      console.error('[import-recipe] Gemini API error:', aiResponse.status, aiError);
       
       if (aiResponse.status === 429) {
         return new Response(
@@ -216,7 +221,7 @@ Deno.serve(async (req) => {
     }
 
     const aiData = await aiResponse.json();
-    const aiContent = aiData.choices?.[0]?.message?.content;
+    const aiContent = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!aiContent) {
       console.error('No AI response content');
@@ -226,7 +231,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('AI response received');
+    console.log('[import-recipe] Gemini response received, content length:', aiContent?.length);
 
     // Parse JSON from AI response (handle markdown code blocks)
     const recipeData = parseAIResponse(aiContent);

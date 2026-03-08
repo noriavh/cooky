@@ -21,3 +21,12 @@ verify_jwt = false
 
 [functions.admin-data]
 verify_jwt = false
+
+[functions.import-recipe-pdf]
+verify_jwt = false
+
+[functions.import-recipe-image]
+verify_jwt = false
+
+[functions.elevenlabs-scribe-token]
+verify_jwt = false
