@@ -5,6 +5,7 @@
 
 // Allowed origins for CORS - includes production, preview, and development URLs
 const ALLOWED_ORIGINS = [
+  'https://cooky.noria-vh.com',                                    // Production
   'http://localhost:5173',                                         // Local development (Vite default)
   'http://localhost:8080',                                         // Local development (Vite alt)
   'http://localhost:3000',                                         // Alternative local port

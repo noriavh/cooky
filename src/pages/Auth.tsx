@@ -213,7 +213,6 @@ const Auth = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
               className="bg-background/50"
             />
           </div>
