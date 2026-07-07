@@ -19,6 +19,10 @@ import ShoppingProducts from "./pages/ShoppingProducts";
 import GlobalProducts from "./pages/GlobalProducts";
 import MealPlanning from "./pages/MealPlanning";
 import TypicalWeek from "./pages/TypicalWeek";
+import FoodJournal from "./pages/FoodJournal";
+import JournalHistory from "./pages/JournalHistory";
+import JournalProducts from "./pages/JournalProducts";
+import JournalProductDetail from "./pages/JournalProductDetail";
 import EssentialProducts from "./pages/EssentialProducts";
 import Cookiers from "./pages/Cookiers";
 import CookierRecipes from "./pages/CookierRecipes";
@@ -135,6 +139,11 @@ const router = createBrowserRouter([
           { path: "global-products", element: <GlobalProducts /> },
           { path: "meal-planning", element: <MealPlanning /> },
           { path: "typical-week", element: <TypicalWeek /> },
+          { path: "journal", element: <FoodJournal /> },
+          { path: "journal/history", element: <JournalHistory /> },
+          { path: "journal/history/:productId", element: <JournalProductDetail /> },
+          { path: "journal/products", element: <JournalProducts /> },
+          { path: "journal/products/:productId", element: <JournalProductDetail /> },
           { path: "aisle-orders", element: <AisleOrders /> },
           { path: "cookiers", element: <Cookiers /> },
           { path: "cookiers/:cookierId/recipes", element: <CookierRecipes /> },

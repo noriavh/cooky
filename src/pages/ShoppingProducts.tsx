@@ -156,7 +156,11 @@ const ShoppingProducts = () => {
       await deleteProduct.mutateAsync(id);
       toast.success('Produit supprimé');
     } catch (error) {
-      toast.error('Erreur lors de la suppression');
+      if ((error as { code?: string })?.code === '23503') {
+        toast.error('Ce produit est utilisé dans un journal alimentaire et ne peut pas être supprimé');
+      } else {
+        toast.error('Erreur lors de la suppression');
+      }
     }
   };
 

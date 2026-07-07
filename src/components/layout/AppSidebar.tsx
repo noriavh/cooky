@@ -1,4 +1,4 @@
-import { ChefHat, List, ShoppingCart, Package, Users, User, LogOut, CalendarDays, Sparkles, Globe, AlignJustify, Star, BookOpen, Leaf } from 'lucide-react';
+import { ChefHat, List, ShoppingCart, Package, Users, User, LogOut, CalendarDays, Sparkles, Globe, AlignJustify, Star, BookOpen, Leaf, NotebookPen, History } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,6 +32,12 @@ const planifierItems = [
   { icon: ShoppingCart, label: 'Liste de courses', path: '/shopping' },
 ];
 
+const journalItems = [
+  { icon: NotebookPen, label: 'Ma journée', path: '/journal' },
+  { icon: History, label: 'Historique', path: '/journal/history' },
+  { icon: Package, label: 'Produits', path: '/journal/products' },
+];
+
 const administrationItems = [
   { icon: Package, label: 'Produits', path: '/shopping/products' },
   { icon: Star, label: 'Mes essentiels', path: '/shopping/essentials' },
@@ -62,8 +68,10 @@ const AppSidebar = () => {
   };
 
   const isActiveRoute = (path: string) => {
-    return location.pathname === path || 
-      (path === '/recipes' && location.pathname.startsWith('/recipes'));
+    return location.pathname === path ||
+      (path === '/recipes' && location.pathname.startsWith('/recipes')) ||
+      (path === '/journal/history' && location.pathname.startsWith('/journal/history')) ||
+      (path === '/journal/products' && location.pathname.startsWith('/journal/products'));
   };
 
   const renderMenuItems = (items: typeof cuisinerItems) => (
@@ -126,6 +134,16 @@ const AppSidebar = () => {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             {renderMenuItems(planifierItems)}
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Journal Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs text-muted-foreground uppercase tracking-wider">
+            Journal
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            {renderMenuItems(journalItems)}
           </SidebarGroupContent>
         </SidebarGroup>
 

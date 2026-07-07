@@ -251,6 +251,88 @@ export type Database = {
           },
         ]
       }
+      journal_meal_items: {
+        Row: {
+          created_at: string
+          id: string
+          meal_id: string
+          product_id: string
+          source_recipe_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meal_id: string
+          product_id: string
+          source_recipe_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meal_id?: string
+          product_id?: string
+          source_recipe_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_meal_items_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "journal_meals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_meal_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "shopping_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_meal_items_source_recipe_id_fkey"
+            columns: ["source_recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_meals: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          note: string | null
+          score: string | null
+          slot_name: string | null
+          slot_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          note?: string | null
+          score?: string | null
+          slot_name?: string | null
+          slot_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          note?: string | null
+          score?: string | null
+          slot_name?: string | null
+          slot_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       list_shares: {
         Row: {
           created_at: string

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ChefHat, FolderHeart, ShoppingCart, CalendarDays, Sparkles } from 'lucide-react';
+import { ChefHat, FolderHeart, ShoppingCart, CalendarDays, Sparkles, NotebookPen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -22,6 +22,11 @@ const navItems = [
     label: 'Courses',
     href: '/shopping',
     icon: ShoppingCart,
+  },
+  {
+    label: 'Journal',
+    href: '/journal',
+    icon: NotebookPen,
   },
 ];
 

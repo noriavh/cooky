@@ -135,7 +135,9 @@ const GlobalProducts = () => {
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer le produit",
+        description: (error as { code?: string })?.code === '23503'
+          ? "Ce produit est utilisé dans un journal alimentaire et ne peut pas être supprimé"
+          : "Impossible de supprimer le produit",
         variant: "destructive",
       });
     }
