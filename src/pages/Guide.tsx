@@ -11,7 +11,8 @@ import {
   ArrowRight,
   ArrowLeft,
   CheckCircle2,
-  BookOpen
+  BookOpen,
+  NotebookPen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -165,6 +166,74 @@ const GuideSectionShopping = () => (
   </div>
 );
 
+const GuideSectionJournal = () => (
+  <div className="space-y-6">
+    <div className="prose prose-sm max-w-none">
+      <h3 className="text-lg font-semibold text-foreground">À quoi sert le journal ?</h3>
+      <p className="text-muted-foreground">
+        Le journal alimentaire est destiné aux personnes qui souhaitent identifier les aliments
+        qu'elles digèrent mal (inflammations, intolérances, allergies...). Notez ce que vous mangez
+        à chaque repas et évaluez comment cela s'est passé : au fil du temps, les produits
+        problématiques ressortent d'eux-mêmes. Le journal est <strong>strictement personnel</strong> :
+        même les membres de votre famille n'y ont pas accès.
+      </p>
+    </div>
+
+    <div className="prose prose-sm max-w-none">
+      <h3 className="text-lg font-semibold text-foreground">Remplir sa journée</h3>
+      <ul className="space-y-2 text-muted-foreground">
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+          <span><strong>Trois repas par défaut</strong> (matin, midi, soir), et le bouton « + Créneau » pour en ajouter d'autres : goûter, collation nocturne...</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+          <span><strong>Ajoutez les ingrédients</strong> consommés : chaque ingrédient est lié à un produit (créé automatiquement s'il n'existe pas), ce qui rend l'historique fiable</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+          <span><strong>Depuis une recette</strong> : le bouton « + » en haut d'un repas importe les ingrédients d'une recette, avec possibilité d'en décocher</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+          <span><strong>Depuis le planning</strong> : « Importer le planning du jour » pré-remplit vos repas avec les recettes planifiées dans « Ma semaine »</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+          <span><strong>Scorez le repas</strong> : vert (OK), orange (quelques soucis de digestion), rouge (ça n'a pas été) — même plus tard dans la journée. Une note libre permet de préciser les symptômes</span>
+        </li>
+      </ul>
+    </div>
+
+    <div className="prose prose-sm max-w-none">
+      <h3 className="text-lg font-semibold text-foreground">Consulter et analyser</h3>
+      <ul className="space-y-2 text-muted-foreground">
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+          <span><strong>Vues Semaine et Mois</strong> : un aperçu en lecture seule de vos repas avec leurs couleurs ; cliquez sur un jour pour l'ouvrir</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+          <span><strong>Historique</strong> : statistiques par produit (répartition vert/orange/rouge), triables pour faire remonter les produits suspects</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+          <span><strong>Produits</strong> : la liste de tout ce que vous avez consommé avec un statut global — rouge dès qu'un repas rouge le contient, sinon orange, sinon vert. Cliquez sur un produit pour voir toutes ses consommations datées</span>
+        </li>
+      </ul>
+    </div>
+
+    <div className="prose prose-sm max-w-none">
+      <h3 className="text-lg font-semibold text-foreground">Exporter pour un diagnostic</h3>
+      <p className="text-muted-foreground">
+        Le bouton « Exporter » génère un fichier Excel (tout l'historique ou une plage de dates)
+        avec le détail de chaque consommation et une synthèse par produit. Ce fichier est pensé
+        pour être soumis à une IA ou un professionnel de santé afin d'analyser vos intolérances.
+      </p>
+    </div>
+  </div>
+);
+
 const GuideSectionProducts = () => (
   <div className="space-y-6">
     <div className="prose prose-sm max-w-none">
@@ -268,6 +337,13 @@ const guideSections: GuideSection[] = [
     icon: ShoppingCart,
     description: 'Gérez vos courses efficacement',
     content: <GuideSectionShopping />
+  },
+  {
+    id: 'journal',
+    title: 'Journal alimentaire',
+    icon: NotebookPen,
+    description: 'Suivez votre alimentation et votre digestion',
+    content: <GuideSectionJournal />
   },
   {
     id: 'produits',
